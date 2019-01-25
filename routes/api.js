@@ -11,18 +11,30 @@
 const expect = require('chai').expect;
 const ObjectID = require('mongodb').ObjectID;
 
+function verifyRequiredInputs(inputs, required) {
+  let hasRequiredValues = true;
+  
+  for (let field of required) {
+    if (!inputs[field] || inputs[field] === '') {
+      hasRequiredValues = false;
+    }
+  }
+  
+  return hasRequiredValues;
+}
+
 function validateIdString(string) {
-  // Determine if an input string can be converted to a valid ObjectID
+  // Determine if an input string can be converted to a valid mongodb.ObjectID
   
   try {
-    return ObjectID(string) instanceof ObjectID; // Check for instanceof ObjectID instead of null?
+    return ObjectID(string) instanceof ObjectID;
   } catch(err) {
     return false;
   }
 }
 
 function inputToQuery(input) {
-  // Converts a request.body or request.query object to a valid query object for MongoDB
+  // Converts a request.body or request.query object to a valid query object for mongodb
   
   const mongoQuery = {};
   
@@ -52,20 +64,23 @@ module.exports = (app, db) => {
   app.route('/api/issues/:project')
   
     .all((req, res, next) => {
+      // If request contains an _id, verify that it can be converted to MongoDb ObjectID
+    
+      let containsValidId;
+    
       if (Object.keys(req.body).includes('_id')) {
-        if (validateIdString(req.body._id)) {
-          return next();
-        }
-        return res.send('_id error');
+        containsValidId = validateIdString(req.body._id);
       } else if (Object.keys(req.query).includes('_id')) {
-        if (validateIdString(req.query._id)) {
-          return next();
-        }
-        return res.send('_id error');
+        containsValidId = validateIdString(req.query._id);
       } else {
         return next();
       }
+    
+      if (containsValidId) return next();
+
+      return res.send('_id error');
     })
+
     
     .get((req, res) => {
       const project = req.params.project;
@@ -95,11 +110,7 @@ module.exports = (app, db) => {
     
       const requiredFields = ['issue_title', 'issue_text', 'created_on'];
     
-      for (let field of requiredFields) {
-        if (!inputObj[field] || inputObj[field] === '') {
-          return res.send('missing inputs');
-        }
-      }
+      if (!verifyRequiredInputs(inputObj, requiredFields)) return res.send('missing inputs');
     
       db.collection(`${project}-issues`).insertOne(inputObj)
         .then(result => res.json(result.ops[0]))
@@ -112,10 +123,15 @@ module.exports = (app, db) => {
     .put((req, res) => {
       const project = req.params.project;
       const inputObj = inputToQuery(req.body);
+      const requiredFields = ['_id'];
     
-      if (Object.keys(inputObj).length < 2) {
+      if (
+        !verifyRequiredInputs(inputObj, requiredFields) 
+        || Object.keys(inputObj).length < 2
+      ) {
         return res.send('no updated field sent');
       }
+    
     
       const id = inputObj._id;
       const timeStamp = new Date();
@@ -138,16 +154,13 @@ module.exports = (app, db) => {
 
     .delete((req, res) => {
       const project = req.params.project;  
-      const inputObj = {
-        _id: ObjectID(req.body._id)
-      };
+      const inputObj = { _id: ObjectID(req.body._id) };
     
       db.collection(`${project}-issues`).deleteOne(inputObj)
         .then(result => {
           if (result.deletedCount > 0) {
             return res.send(`deleted ${inputObj._id}`);
           } 
-          
           return res.send(`could not delete ${inputObj._id}`);
         })
         .catch(err => {
