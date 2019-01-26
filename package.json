@@ -1,7 +1,7 @@
 {
-  "name": "my-hyperdev-app",
+  "name": "issue-tracker",
   "version": "0.0.1",
-  "description": "What am I about?",
+  "description": "Simple for logging, updating and deleting issues",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -22,19 +22,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://hyperdev.com/#!/project/welcome-project"
+    "url": "https://github.com/crosenau/fcc-issue-tracker"
   },
   "keywords": [
     "node",
     "hyperdev",
     "express"
   ],
-  "license": "MIT",
-  "devDependencies": {
-    "eslint": "^5.3.0",
-    "eslint-config-airbnb": "^17.1.0",
-    "eslint-plugin-import": "^2.15.0",
-    "eslint-plugin-jsx-a11y": "^6.2.0",
-    "eslint-plugin-react": "^7.12.4"
-  }
+  "license": "MIT"
 }

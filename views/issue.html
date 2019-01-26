@@ -17,7 +17,7 @@
       <div id="submitNewIssue">
         <br>
         <h3>Submit a new issue:</h3>
-        <form id="newIssue" method="post" action="/api/">
+        <form id="newIssue"> <!--  method="post" action="/api" -->
           <input type="text" name="issue_title" placeholder="*Title" style="width: 320px; margin-bottom: 3px;" required=""><br>
           <textarea type="text" name="issue_text" placeholder="*Text" style="width: 320px; height: 100px;" required=""></textarea><br>
           <input type="text" name="created_by" placeholder="*Created by" style="width: 100px" required="">
@@ -51,18 +51,17 @@
               var openstatus;
               (ele.open) ? openstatus = "open" : openstatus = "closed";
               var single = [
-                "<div class="issue "+openstatus+"">",
-                "<p class="id">id: "+ele._id+"</p>",
-                "<h3>"+ele.issue_title+" -  ("+openstatus+")</h3>",
-                "<br>",
-                "<p>"+ele.issue_text+"</p>",
-                "<p>"+ele.status_text+"</p>",
-                "<br>",
-                "<p class="id"><b>Created by:</b> "+ele.created_by+"  <b>Assigned to:</b> "+ele.assigned_to,
-                "<p class="id"><b>Created on:</b> "+ele.created_on+"  <b>Last updated:</b> "+ele.updated_on,
-                "<br><a href="#" class="closeIssue" id=""+ele._id+"">close?</a> <a href="#" class="deleteIssue" id=""+ele._id+"">delete?</a>",
-                "</div>"
-                
+                '<div class="issue" '+openstatus+'>',
+                '<p class="id">id: '+ele._id+'</p>',
+                '<h3>'+ele.issue_title+' -  ('+openstatus+')</h3>',
+                '<br>',
+                '<p>'+ele.issue_text+'</p>',
+                '<p>'+ele.status_text+'</p>',
+                '<br>',
+                '<p class="id"><b>Created by:</b> '+ele.created_by+'  <b>Assigned to:</b> '+ele.assigned_to,
+                '<p class="id"><b>Created on:</b> '+ele.created_on+'  <b>Last updated:</b> '+ele.updated_on,
+                '<br><a href="#" class="closeIssue" id='+ele._id+'>close?</a> <a href="#" class="deleteIssue" id='+ele._id+'>delete?</a>',
+                '</div>'
               ];
               issues.push(single.join(""));
             });
