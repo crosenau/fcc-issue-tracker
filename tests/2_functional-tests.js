@@ -153,7 +153,7 @@ suite('Functional Tests', () => {
         chai.request(server)
           .get('/api/issues/test')
           .query({})
-          .end(function(err, res){
+          .end((err, res) => {
             assert.equal(res.status, 200);
             assert.isArray(res.body);
             assert.property(res.body[0], 'issue_title');
