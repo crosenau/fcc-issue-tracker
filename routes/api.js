@@ -14,8 +14,8 @@ const ObjectID = require('mongodb').ObjectID;
 function verifyRequiredInputs(inputs, required) {
   let hasRequiredValues = true;
   
-  for (let field of required) {
-    if (!inputs[field] || inputs[field] === '') {
+  for (let key of required) {
+    if (!inputs[key] || inputs[key] === '') {
       hasRequiredValues = false;
     }
   }
@@ -90,7 +90,9 @@ module.exports = (app, db) => {
       } else {
         return next();
       }
+    
       if (containsValidId) return next();
+    
       return res.send('_id error');
     })
 
