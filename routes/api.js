@@ -60,13 +60,13 @@ function inputsToQuery(inputs) {
 }
 
 function sanitizeInputs(inputs) {
-  const htmlTags = /(\<\/?\w+\s?)?>?/gm;
-  
   let sanitized = {};
   
   for (let key in inputs) {
     if (typeof inputs[key] === 'string') {
-      sanitized[key] = inputs[key].replace(htmlTags, '');
+      sanitized[key] = inputs[key]
+        .replace(/\</gm, '&lt')
+        .replace(/\>/gm, '&gt');
     } else {
       sanitized[key] = inputs[key];
     }
