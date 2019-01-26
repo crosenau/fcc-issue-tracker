@@ -33,31 +33,46 @@ function validateIdString(string) {
   }
 }
 
-function inputToQuery(input) {
-  // Converts a request.body or request.query object to a valid query object for mongodb
-  
+function inputsToQuery(inputs) {
+  // Converts a request.body or request.query object to a valid query object for mongod
   const mongoQuery = {};
   
-  for (let key in input) {
+  for (let key in inputs) {
     switch (key) {
       case '_id':
-        mongoQuery[key] = ObjectID(input[key]);
+        mongoQuery[key] = ObjectID(inputs[key]);
         break;
       case 'open':
-        mongoQuery[key] = (input[key] === 'true');
+        mongoQuery[key] = (inputs[key] === 'true');
         break;
       case 'created_on':
-        mongoQuery[key] = new Date(input[key]);
+        mongoQuery[key] = new Date(inputs[key]);
         break;
       case 'updated_on':
-        mongoQuery[key] = new Date(input[key]);
+        mongoQuery[key] = new Date(inputs[key]);
         break;
       default:
-        mongoQuery[key] = input[key];
+        mongoQuery[key] = inputs[key];
     }
   }
   
   return mongoQuery;
+}
+
+function sanitizeInputs(inputs) {
+  const htmlTags = /(\<\/?\w+\s?)?>?/gm;
+  
+  let sanitized = {};
+  
+  for (let key in inputs) {
+    if (typeof inputs[key] === 'string') {
+      sanitized[key] = inputs[key].replace(htmlTags, '');
+    } else {
+      sanitized[key] = inputs[key];
+    }
+  }
+  
+  return sanitized;
 }
 
 module.exports = (app, db) => {
@@ -75,16 +90,13 @@ module.exports = (app, db) => {
       } else {
         return next();
       }
-    
       if (containsValidId) return next();
-
       return res.send('_id error');
     })
 
-    
     .get((req, res) => {
       const project = req.params.project;
-      const inputObj = inputToQuery(req.query);
+      const inputObj = sanitizeInputs(inputsToQuery(req.query));
     
       db.collection(`${project}-issues`).find(inputObj).toArray()
         .then(results => res.json(results))
@@ -97,7 +109,7 @@ module.exports = (app, db) => {
     .post((req, res) => {    
       const project = req.params.project;
       const timeStamp = new Date();
-      const inputObj = {
+      const inputObj = sanitizeInputs({
         issue_title: req.body.issue_title,
         issue_text: req.body.issue_text,
         created_on: timeStamp,
@@ -106,7 +118,7 @@ module.exports = (app, db) => {
         assigned_to: req.body.assigned_to || '',
         open: true,
         status_text: req.body.status_text || ''
-      };
+      });
     
       const requiredFields = ['issue_title', 'issue_text', 'created_on'];
     
@@ -122,7 +134,7 @@ module.exports = (app, db) => {
 
     .put((req, res) => {
       const project = req.params.project;
-      const inputObj = inputToQuery(req.body);
+      const inputObj = sanitizeInputs(inputsToQuery(req.body));
       const requiredFields = ['_id'];
     
       if (
@@ -160,7 +172,8 @@ module.exports = (app, db) => {
         .then(result => {
           if (result.deletedCount > 0) {
             return res.send(`deleted ${inputObj._id}`);
-          } 
+          }
+        
           return res.send(`could not delete ${inputObj._id}`);
         })
         .catch(err => {

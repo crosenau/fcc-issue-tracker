@@ -233,8 +233,6 @@ suite('Functional Tests', () => {
             assert.equal(res.text, `could not delete ${input}`);
             done();
           });
-      });
-      
+      });     
     });
-
 });
