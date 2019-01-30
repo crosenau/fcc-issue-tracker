@@ -148,7 +148,6 @@ module.exports = (app, db) => {
 
     .delete((req, res) => {
       const project = req.params.project;  
-      const filter = { _id: ObjectID(req.body._id) };
       const id = ObjectID(req.body._id);
 
       db.collection(`${project}-issues`).deleteOne({ _id: id })
